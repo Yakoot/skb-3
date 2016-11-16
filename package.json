@@ -1,0 +1,29 @@
+{
+  "name": "skb-3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yakoot/skb-3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yakoot/skb-3/issues"
+  },
+  "homepage": "https://github.com/Yakoot/skb-3#readme",
+  "devDependencies": {
+    "gulp": "3.9.1",
+    "tslint": "3.15.1",
+    "typescript": "2.0.8"
+  },
+  "dependencies": {
+    "@types/express": "latest",
+    "express": "latest"
+  }
+}
