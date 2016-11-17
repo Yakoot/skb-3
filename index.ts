@@ -1,10 +1,20 @@
 import express = require("express");
+import mongoose = require("mongoose");
+import bodyParser = require("body-parser");
+// import * as prm from 'bluebird';
+import saveData = require("./saveData");
+import Pet = require("./models/Pet");
+import User = require("./models/User");
+
+import isAdmin = require("./middlewares/isAdmin");
+
 
 import Request = express.Request;
 import Response = express.Response;
 import NextFunction = express.NextFunction;
 
-let app = express();
+mongoose.connect('mongodb://localhost/test');
+mongoose.Promise = Promise;
 
 // CORS middleware
 const allowCrossDomain = function(req: Request, res: Response, next: NextFunction) {
@@ -15,23 +25,44 @@ const allowCrossDomain = function(req: Request, res: Response, next: NextFunctio
     next();
 };
 
+let app = express();
 app.use(allowCrossDomain);
+app.use(bodyParser.json());
 
-// routes
-app.get("/task2A", function (req: Request, res: Response) {
-
-    let a = parseFloat(req.query.a);
-    let b = parseFloat(req.query.b);
-
-    a = isNaN(a) ? 0 : a;
-    b = isNaN(b) ? 0 : b;
-
-    let sum = a + b;
-    res.send(sum.toString());
+app.get("/clear", isAdmin, async (req: Request, res: Response) => {
+  await User.remove({});
+  await Pet.remove({});
+  return res.send("OK");
 });
 
-app.get("/", function (req: Request, res: Response) {
-  res.send("123234");
+app.post("/data", async (req: Request, res: Response) => {
+  const data = req.body;
+  if(!data.user) return res.status(400).send("user required");
+  if(!data.pets) data.pets = [];
+
+  const user = await User.findOne({
+    name: data.user.name
+  });
+
+  if (user) return res.status(400).send("user.name is exists");
+
+  try {
+    const result = await saveData(data);
+    return res.json(result);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+
+app.get("/users", async (req: Request, res: Response) => {
+  const users = await User.find();
+  res.json(users);
+});
+
+app.get("/pets", async (req: Request, res: Response) => {
+  const pets = await Pet.find().populate("owner");
+  res.json(pets);
 });
 
 app.listen(3000, function () {
