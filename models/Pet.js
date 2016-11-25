@@ -4,18 +4,30 @@ const _ = require("lodash");
 const { Schema } = mongoose;
 ;
 const petSchema = new Schema({
+    id: {
+        type: Number,
+        required: true
+    },
     type: {
         type: String,
-        enum: ["cat", "dog"],
+        enum: ["cat", "dog", "rat"],
         required: true
     },
-    name: {
+    color: {
         type: String,
         required: true
     },
-    owner: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: true
+    },
+    userId: {
+        type: Number,
+        required: true
+    },
+    age: {
+        type: Number,
         required: true
     }
 }, {

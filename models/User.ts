@@ -4,14 +4,43 @@ const {Schema} = mongoose;
 
 
 interface IUser {
-    name: string;
+    id: number;
+    username: string;
+    fullname: string;
+    password: string;
+    values: {
+      money: string;
+      origin: string;
+    };
 };
 interface IUserModel extends IUser, mongoose.Document { }
 
 const userSchema = new Schema({
-  name: {
+  id: {
+    type: Number,
+    required: true
+  },
+  username: {
     type: String,
     required: true
+  },
+  fullname: {
+    type: String,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  values: {
+    money: {
+      type: String,
+      required: true
+    },
+    origin: {
+      type: String,
+      required: true
+    }
   }
 }, {
   timestamps: true,
