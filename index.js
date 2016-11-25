@@ -8,14 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const express = require("express");
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const saveData = require("./saveData");
-const Pet = require("./models/Pet");
-const User = require("./models/User");
-const isAdmin = require("./middlewares/isAdmin");
-mongoose.connect('mongodb://localhost/test');
-mongoose.Promise = Promise;
+const _ = require("lodash");
+let pokemons = require("./pokemons.json");
+pokemons = _.sortBy(pokemons, "name");
+let all = {
+    "angular": _.orderBy(pokemons, [(one) => {
+            return one.weight / one.height;
+        }, "name"], ["asc", "asc"]),
+    "fat": _.orderBy(pokemons, [(one) => {
+            return one.weight / one.height;
+        }, "name"], ["desc", "asc"]),
+    "huge": _.orderBy(pokemons, ["height", "name"], ["desc", "asc"]),
+    "micro": _.orderBy(pokemons, ["height", "name"], ["asc", "asc"]),
+    "heavy": _.orderBy(pokemons, ["weight", "name"], ["desc", "asc"]),
+    "light": _.orderBy(pokemons, ["weight", "name"], ["asc", "asc"])
+};
 const allowCrossDomain = function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://account.skill-branch.ru");
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
@@ -25,37 +33,19 @@ const allowCrossDomain = function (req, res, next) {
 let app = express();
 app.use(allowCrossDomain);
 app.use(bodyParser.json());
-app.get("/clear", isAdmin, (req, res) => __awaiter(this, void 0, void 0, function* () {
-    yield User.remove({});
-    yield Pet.remove({});
-    return res.send("OK");
-}));
-app.post("/data", (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const data = req.body;
-    if (!data.user)
-        return res.status(400).send("user required");
-    if (!data.pets)
-        data.pets = [];
-    const user = yield User.findOne({
-        name: data.user.name
-    });
-    if (user)
-        return res.status(400).send("user.name is exists");
-    try {
-        const result = yield saveData(data);
-        return res.json(result);
+let makeOffset = (array, offset, limit) => {
+    let answer = _.map(array, (one) => { return one.name; });
+    return answer.slice(offset, offset + limit);
+};
+app.get("/:type?", (req, res) => __awaiter(this, void 0, void 0, function* () {
+    let offset = req.query.offset ? +req.query.offset : 0;
+    let limit = req.query.limit ? +req.query.limit : 20;
+    let type = "";
+    if (req.params && req.params.type) {
+        type = req.params.type;
     }
-    catch (err) {
-        return res.status(500).json(err);
-    }
-}));
-app.get("/users", (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const users = yield User.find();
-    res.json(users);
-}));
-app.get("/pets", (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const pets = yield Pet.find().populate("owner");
-    res.json(pets);
+    let array = req.params.type ? all[req.params.type] : pokemons;
+    res.json(makeOffset(array, offset, limit));
 }));
 app.listen(3000, function () {
     console.log("Example app listening on port 3000!");
